@@ -1,0 +1,106 @@
+# PERFECT — Telegram bot
+
+## 🔧 Imkoniyatlar
+
+- 💬 Foydalanuvchi botga yozgan xabarlari avtomatik adminga (sizga) yetkaziladi, siz esa oddiygina **Reply** qilib javob berasiz
+- 🔐 Alohida **admin panel** (`/admin` buyrug'i, faqat sizning ID'ingiz uchun ochiladi)
+- 📢 Admin paneldan barcha foydalanuvchilarga **e'lon (broadcast)** yuborish
+- 🚫 Guruhda **link va fayl yuborishni** avtomatik taqiqlash (adminlar bundan mustasno)
+- 🎬 Foydalanuvchi link yuborsa (YouTube/Instagram/TikTok va h.k.), bot videoni **yuklab beradi**
+- 📁 Admin turli **APK fayllarni** (masalan, Granny 1, Granny 2...) botga yuklab qo'yadi, foydalanuvchilar esa menyu orqali tanlab yuklab olishadi
+
+## 📦 O'rnatish
+
+1. Python 3.10+ o'rnatilgan bo'lishi kerak
+
+2. Loyihani yuklab, papkaga kiring, so'ng kerakli kutubxonalarni o'rnating:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. `.env.example` faylidan nusxa oling va `.env` deb nomlang:
+   ```bash
+   cp .env.example .env
+   ```
+
+4. `.env` faylini oching va quyidagilarni to'ldiring:
+   - **BOT_TOKEN** — [@BotFather](https://t.me/BotFather) orqali yaratilgan bot tokeni
+   - **ADMIN_ID** — sizning shaxsiy Telegram ID'ingiz ([@userinfobot](https://t.me/userinfobot) orqali bilib olishingiz mumkin)
+
+5. Botni ishga tushiring:
+   ```bash
+   python bot.py
+   ```
+
+## 🖥 Admin paneldan foydalanish
+
+Botga shaxsiy (private) chatda `/admin` deb yozing — quyidagi tugmalar chiqadi:
+
+| Tugma | Vazifasi |
+|---|---|
+| 📢 E'lon berish | Barcha foydalanuvchilarga xabar (matn/rasm/video) yuborish |
+| 📁 APK qo'shish | Yangi APK fayl yuklash (nom + fayl) |
+| 📋 APK ro'yxati | Mavjud APK fayllarni ko'rish va o'chirish |
+| 📊 Statistika | Foydalanuvchilar va APK fayllar soni |
+
+**Foydalanuvchiga javob berish:** Foydalanuvchi yozgan xabar sizga forward qilinganda, o'sha xabarga oddiy **Reply** qiling — javobingiz avtomatik unga yetib boradi.
+
+## 🚀 Railway'da hosting qilish
+
+1. Loyihani GitHub'ga joylang (repo public yoki private bo'lishi mumkin — `.env` fayl `.gitignore` orqali chetlab o'tiladi)
+
+2. [railway.app](https://railway.app) ga kiring → **New Project** → **Deploy from GitHub repo** → shu repo'ni tanlang
+
+3. Railway avtomatik `Procfile`'ni topib, botni **worker** sifatida ishga tushiradi (alohida web-server kerak emas, chunki bot polling rejimida ishlaydi)
+
+4. **Variables** bo'limiga o'ting va quyidagilarni qo'shing:
+   - `BOT_TOKEN` — bot tokeningiz
+   - `ADMIN_ID` — sizning Telegram ID'ingiz
+
+5. **Ma'lumotlarni saqlab qolish uchun (muhim!):** Railway'da fayl tizimi har deploy'da tozalanadi, ya'ni SQLite baza va yuklangan APK fayllar o'chib ketishi mumkin. Buning oldini olish uchun:
+   - Loyiha sozlamalarida **Volume** qo'shing (masalan, `/data` nomli)
+   - Railway avtomatik `RAILWAY_VOLUME_MOUNT_PATH` degan muhit o'zgaruvchisini beradi — `config.py` shuni avtomatik aniqlab, baza va APK fayllarni o'sha doimiy papkaga saqlaydi (qo'shimcha sozlash shart emas)
+
+6. **Deploy** tugmasini bosing — bir necha daqiqada bot ishga tushadi. Loglarni **Deployments → View Logs** orqali kuzatishingiz mumkin.
+
+## 🛠 Muammolarni bartaraf etish
+
+**Admin panel ochilmayapti / meni oddiy user deb hisoblayapti:**
+1. Botga `/myid` deb yozing — bot sizga aynan Telegram ID'ingizni ko'rsatadi
+2. Shu raqamni Railway'dagi **Variables → ADMIN_ID** ga aynan shu ko'rinishda kiriting (bo'sh joy, tirnoqsiz — faqat raqamlar)
+3. O'zgartirgandan so'ng Railway'da **Redeploy** qiling
+4. Botga qayta `/start` yozing — endi admin panel avtomatik ochiladi
+
+**Railway build xatosi "could not determine how to build the app":**
+- Agar loyiha GitHub'da papka ichida joylashgan bo'lsa (masalan `perfect_bot/bot.py`), Railway **Settings → Source → Root Directory** ga `perfect_bot` deb yozing
+
+## 🤖 Botni guruhga qo'shish
+
+1. Botni guruhingizga a'zo qiling
+2. Botga **admin** huquqini bering (xabarlarni o'chira olishi uchun "Delete messages" ruxsati kerak)
+3. Shundan so'ng guruhda link yoki fayl yuborilsa, bot avtomatik o'chiradi (guruh adminlaridan tashqari)
+
+## 📁 Loyiha tuzilishi
+
+```
+perfect_bot/
+├── bot.py              # Botni ishga tushiruvchi asosiy fayl
+├── config.py           # Sozlamalar (token, admin ID, papkalar)
+├── database.py         # SQLite ma'lumotlar bazasi funksiyalari
+├── handlers/
+│   ├── user.py         # Oddiy foydalanuvchi bilan ishlash
+│   ├── admin.py        # Admin panel
+│   ├── group.py        # Guruh moderatsiyasi
+│   └── downloader.py   # Video yuklab olish (yt-dlp)
+├── apk_files/           # Yuklangan APK fayllar shu yerda saqlanadi
+├── downloads/            # Video yuklab olish uchun vaqtinchalik papka
+├── requirements.txt
+├── .env.example
+└── README.md
+```
+
+## ⚠️ Eslatmalar
+
+- Telegram Bot API orqali bot yubora oladigan fayl hajmi standart holatda **~50MB** bilan cheklangan (`config.py` dagi `MAX_FILE_SIZE_MB`). Kattaroq fayllar/videolar uchun Telegram Bot API Local Server kerak bo'ladi.
+- Video yuklab berish funksiyasi ba'zi platformalarda (Instagram, TikTok) login/cookie talab qilishi mumkin — agar xatolik chiqsa, `yt-dlp` sozlamalarini kengaytirish kerak bo'lishi mumkin.
+- Bot doim ishlab turishi uchun uni server (VPS) da yoki `systemd`/`screen`/`pm2` kabi vositalar bilan fon jarayon sifatida ishga tushirish tavsiya etiladi.
